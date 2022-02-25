@@ -1,4 +1,3 @@
-import 'package:at_lookup/at_lookup.dart';
 import 'package:at_utils/at_logger.dart';
 import 'package:iot_sender/at_onboarding_cli.dart';
 import 'package:at_client/at_client.dart';
@@ -37,9 +36,10 @@ void main(List<String> arguments) async {
     ..commitLogPath = 'lib/hive/client/commit'
     ..isLocalStoreRequired = true
     ..privateKey = pkam
-    ..syncRequestTriggerInSeconds = 1
-    ..syncRequestThreshold = 1
-    ..syncRunIntervalSeconds = 1
+    // These can be added once in the main releases
+    // ..syncRequestTriggerInSeconds = 1
+    // ..syncRequestThreshold = 1
+    // ..syncRunIntervalSeconds = 1
     ..rootDomain = 'root.atsign.org';
 
   atClientManager = AtClientManager.getInstance();

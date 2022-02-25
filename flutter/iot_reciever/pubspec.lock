@@ -58,21 +58,19 @@ packages:
     source: hosted
     version: "1.0.0"
   at_client:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: at_client
-      ref: sync_service_modifications
-      resolved-ref: "91f283948e7c7b1f1299406b3ac1a1cda9ee7df6"
-      url: "https://github.com/atsign-foundation/at_client_sdk.git"
-    source: git
-    version: "3.0.10"
+      name: at_client
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.12"
   at_client_mobile:
     dependency: "direct main"
     description:
       name: at_client_mobile
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.5"
+    version: "3.1.8"
   at_commons:
     dependency: transitive
     description:
@@ -750,7 +748,7 @@ packages:
       name: url_launcher_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.8"
+    version: "2.0.9"
   url_launcher_windows:
     dependency: transitive
     description:

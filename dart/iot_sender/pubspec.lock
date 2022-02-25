@@ -39,12 +39,10 @@ packages:
   at_client:
     dependency: "direct main"
     description:
-      path: at_client
-      ref: sync_service_modifications
-      resolved-ref: "91f283948e7c7b1f1299406b3ac1a1cda9ee7df6"
-      url: "https://github.com/atsign-foundation/at_client_sdk.git"
-    source: git
-    version: "3.0.10"
+      name: at_client
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.12"
   at_commons:
     dependency: transitive
     description:

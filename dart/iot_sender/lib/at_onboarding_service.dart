@@ -12,7 +12,7 @@ import 'package:encrypt/encrypt.dart';
 class OnboardingService {
   late final String _rootDomain;
   late final int _rootPort;
-  late String _atSign;
+  late final String _atSign;
   bool _isPkamAuthenticated = false;
   late final AtLookupImpl _atLookup =
       AtLookupImpl(_atSign, _rootDomain, _rootPort);

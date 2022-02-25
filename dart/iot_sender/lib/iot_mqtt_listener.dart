@@ -6,6 +6,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:at_client/at_client.dart';
 import 'package:at_commons/at_commons.dart';
+// ignore: implementation_imports
 import 'package:at_client/src/service/notification_service.dart';
 
 final client = MqttServerClient('localhost', '');
@@ -168,14 +169,14 @@ Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate, S
   logger.info('calling atClient.put for HeartRate #$thisHRPutNo');
   // If you prefer the autonotification method
   //await atClient.put(key, heartRateAsString);
-
+  // logger.info('atClient.put #$thisHRPutNo complete');
 
   NotificationService notificationService = atClientManager.notificationService;
 
   NotificationResult notificationResponse = await notificationService
       .notify(NotificationParams.forUpdate(key, value: heartRateAsString));
   logger.info(notificationResponse.toString());
-  logger.info('atClient.put #$thisHRPutNo complete');
+
 }
 
 Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat, String atsign, String toAtsign,
@@ -200,14 +201,14 @@ Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat, String at
   logger.info('calling atClient.put for O2 #$thisO2PutNo');
   // If you prefer the autonotification method
   // await atClient.put(key, o2SatAsString);
-
+  // logger.info('atClient.put #$thisO2PutNo complete');
 
   NotificationService notificationService = atClientManager.notificationService;
 
   NotificationResult notificationResponse = await notificationService
       .notify(NotificationParams.forUpdate(key, value: o2SatAsString));
  logger.info(notificationResponse.toString());
-  logger.info('atClient.put #$thisO2PutNo complete');
+
 }
 
 /// The subscribed callback

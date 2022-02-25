@@ -7,6 +7,7 @@ import 'dart:io';
 class AtOnboardingConfig {
   dynamic getConfigValueFromYaml(List<String> args) {
     YamlMap? yamlMap = ConfigUtil.getConfigYaml();
+    // ignore: prefer_typing_uninitialized_variables
     var value;
     if (yamlMap != null) {
       for (int i = 0; i < args.length; i++) {
@@ -25,6 +26,7 @@ class AtOnboardingConfig {
 
   String? getStringValueFromYaml(List<String> keyParts) {
     var yamlMap = ConfigUtil.getConfigYaml();
+    // ignore: prefer_typing_uninitialized_variables
     var value;
     if (yamlMap != null) {
       for (int i = 0; i < keyParts.length; i++) {

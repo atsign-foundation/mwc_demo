@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:at_app_flutter/at_app_flutter.dart' show AtEnv;
 import 'package:at_client_mobile/at_client_mobile.dart';
-// import 'package:at_onboarding_flutter/at_onboarding_flutter.dart' show Onboarding;
-import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'package:at_utils/at_logger.dart' show AtSignLogger;
 import 'package:flutter/material.dart';
 import 'package:iot_reciever/models/iot_model.dart';
@@ -33,13 +31,14 @@ Future<AtClientPreference> loadAtClientPreference() async {
   var dir = await getApplicationSupportDirectory();
 
   return AtClientPreference()
+    // these can be added once in the main release
+    // ..syncRequestTriggerInSeconds = 1
+    // ..syncRequestThreshold = 1
+    // ..syncRunIntervalSeconds = 1
     ..rootDomain = AtEnv.rootDomain
     ..namespace = AtEnv.appNamespace
     ..hiveStoragePath = dir.path
     ..commitLogPath = dir.path
-    ..syncRequestTriggerInSeconds = 1
-    ..syncRequestThreshold = 1
-    ..syncRunIntervalSeconds = 1
     ..isLocalStoreRequired = true;
 
   // TODO
@@ -57,8 +56,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // * load the AtClientPreference in the background
   IoT ioT = IoT(
-      bloodOxygen: '0', heartRate: '0', sensorName: '@ZARIOT', heartTime: DateTime.now().toString(), oxygenTime:DateTime.now().toString());
-  Future<AtClientPreference> futurePreference = loadAtClientPreference();
+      bloodOxygen: '0',
+      heartRate: '0',
+      sensorName: '@ZARIOT',
+      heartTime: DateTime.now().toString(),
+      oxygenTime: DateTime.now().toString());
 
   @override
   Widget build(BuildContext context) {
@@ -79,4 +81,5 @@ class _MyAppState extends State<MyApp> {
       initialRoute: OnboardingScreen.id,
     );
   }
+
 }

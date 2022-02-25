@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_literals_to_create_immutables, unnecessary_brace_in_string_interps
 
 import 'dart:async';
 import 'dart:io';
@@ -36,13 +36,30 @@ class _HomeScreenState extends State<HomeScreen> {
       bloodOxygen: '0',
       heartTime: DateTime.now().toString(),
       oxygenTime: DateTime.now().toString());
+  AtClientManager atClientManager = AtClientManager.getInstance();
+  late AtClientPreference preference;
+  late AtClient atClient;
   Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    AtClientManager atClientManager = AtClientManager.getInstance();
+
+    atClient = atClientManager.atClient;
+
+    var currentAtsign = atClient.getCurrentAtSign().toString();
+
+    void setUpAt() async {
+      preference = await loadAtClientPreference();
+      await atClientManager.setCurrentAtSign(
+          currentAtsign, AtEnv.appNamespace, preference);
+      atClient = atClientManager.atClient;
+    }
+
+    setUpAt.call();
+
     var notificationService = atClientManager.notificationService;
+
     atClientManager.syncService.sync(onDone: () {
       _logger.info('sync complete');
     });
@@ -51,12 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
         .listen((notification) {
       _logger.info(
           'notification subscription handler got notification with key ${notification.toJson().toString()}');
-      getAtsignData(context, notification.key);
+      getAtsignData(context, atClient, notification.key);
     });
     // reset dials if no data comes in checkExpiry(int Seconds)
     timer = Timer.periodic(
-         const Duration(seconds: 1), (Timer t) => checkExpiry(90));
-    setState(() {});
+        const Duration(seconds: 1), (Timer t) => checkExpiry(90));
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -318,20 +337,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void getAtsignData(BuildContext context, String notificationKey) async {
-    /// Get the AtClientManager instance
-    var atClientManager = AtClientManager.getInstance();
-
-    Future<AtClientPreference> futurePreference = loadAtClientPreference();
-
-    var preference = await futurePreference;
-
-    String? currentAtsign;
-    late AtClient atClient;
-    atClient = atClientManager.atClient;
-    atClientManager.atClient.setPreferences(preference);
-    currentAtsign = atClient.getCurrentAtSign();
-    _logger.info('getAtsignData: currentAtsign is $currentAtsign');
+  void getAtsignData(
+      BuildContext context, AtClient atClient, String notificationKey) async {
 
     //Split the notification to get the key and the sharedByAtsign
     // Notification looks like this :-
@@ -339,8 +346,11 @@ class _HomeScreenState extends State<HomeScreen> {
     var notificationList = notificationKey.split(':');
     String sharedByAtsign = '@' + notificationList[1].split('@').last;
     String keyAtsign = notificationList[1];
-    keyAtsign = keyAtsign.replaceAll(
-        '.${preference.namespace.toString()}$sharedByAtsign', '');
+    var currentAtsign = atClient.getCurrentAtSign().toString();
+    String nameSpace = AtEnv.appNamespace;
+    keyAtsign = keyAtsign.replaceAll(".$nameSpace$sharedByAtsign", '');
+
+    print(keyAtsign + ' ' + sharedByAtsign + ' ' + currentAtsign);
 
     var metaData = Metadata()
       ..isPublic = false
@@ -359,26 +369,28 @@ class _HomeScreenState extends State<HomeScreen> {
     var value = reading.value.toString();
     if (keyAtsign == 'mwc_hr') {
       readings.heartRate = value;
-    // Use this for created at source (reader)
-    //readings.heartTime = reading.metadata?.createdAt?.toString();
-    // Or this f client got the reading (safer for demos!)
+      // Use this for created at source (reader)
+      //readings.heartTime = reading.metadata?.createdAt?.toString();
+      // Or this f client got the reading (safer for demos!)
       readings.heartTime = DateTime.now().toUtc().toString();
     }
     if (keyAtsign == 'mwc_o2') {
       readings.bloodOxygen = value;
-    // Use this for created at source (reader)
-    // readings.oxygenTime = reading.metadata?.createdAt?.toString();   
-    //Or this f client got the reading (safer for demos!)
+      // Use this for created at source (reader)
+      // readings.oxygenTime = reading.metadata?.createdAt?.toString();
+      //Or this f client got the reading (safer for demos!)
       readings.oxygenTime = DateTime.now().toUtc().toString();
     }
     // Use this for created at source (reader)
-    
+
     //Or this f client got the reading (safer for demos!)
     var createdAt = reading.metadata?.createdAt;
     var dateFormat = DateFormat("HH:mm.ss");
     String dateFormated = dateFormat.format(createdAt!);
     readings.sensorName = '$dateFormated UTC | $sharedByAtsign';
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
     _logger.info(
         'Yay $currentAtsign was just sent a $keyAtsign reading of $value ! From $sharedByAtsign');
   }
@@ -392,11 +404,15 @@ class _HomeScreenState extends State<HomeScreen> {
     now = now.subtract(Duration(seconds: expireSeconds));
     if (now.isAfter(heartExpire)) {
       readings.heartRate = '0';
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
     if (now.isAfter(oxygenExpire)) {
       readings.bloodOxygen = '0';
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 }
