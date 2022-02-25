@@ -37,6 +37,9 @@ void main(List<String> arguments) async {
     ..commitLogPath = 'lib/hive/client/commit'
     ..isLocalStoreRequired = true
     ..privateKey = pkam
+    ..syncRequestTriggerInSeconds = 1
+    ..syncRequestThreshold = 1
+    ..syncRunIntervalSeconds = 1
     ..rootDomain = 'root.atsign.org';
 
   atClientManager = AtClientManager.getInstance();
@@ -77,6 +80,6 @@ void main(List<String> arguments) async {
 
   logger.info("calling iotListen atSign '$atsign', toAtSign '$toAtsign'");
 
-  iotListen(atClient, atsign, toAtsign);
+  iotListen(atClientManager, atClient, atsign, toAtsign);
   print('listening');
 }

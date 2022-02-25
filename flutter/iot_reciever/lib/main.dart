@@ -37,7 +37,11 @@ Future<AtClientPreference> loadAtClientPreference() async {
     ..namespace = AtEnv.appNamespace
     ..hiveStoragePath = dir.path
     ..commitLogPath = dir.path
+    ..syncRequestTriggerInSeconds = 1
+    ..syncRequestThreshold = 1
+    ..syncRunIntervalSeconds = 1
     ..isLocalStoreRequired = true;
+
   // TODO
   // * By default, this configuration is suitable for most applications
   // * In advanced cases you may need to modify [AtClientPreference]

@@ -34,7 +34,7 @@ int getNextFakeO2IntValue() {
 }
 
 Future<void> iotListen(
-    AtClient atClient, String atsign, String toAtsign) async {
+     AtClientManager atClientManager, AtClient atClient, String atsign, String toAtsign) async {
   client.logging(on: false);
   client.setProtocolV311();
   client.keepAlivePeriod = 20;
@@ -124,14 +124,14 @@ Future<void> iotListen(
       lastHeartRateDoubleValue = heartRateDoubleValue;
 
       await shareHeartRate(
-          heartRateDoubleValue, atsign, toAtsign, putCounterHR, atClient);
+          atClientManager, heartRateDoubleValue, atsign, toAtsign, putCounterHR, atClient);
 
       if (fakingO2SatValues) {
         // get random int between 0 and 101, then subtract 50 to get a number in range -50..+50
         currentFakeO2IntValue = getNextFakeO2IntValue();
         double fakeO2DoubleValue = currentFakeO2IntValue / 10;
         await shareO2Sat(
-            fakeO2DoubleValue, atsign, toAtsign, putCounterO2, atClient);
+           atClientManager, fakeO2DoubleValue, atsign, toAtsign, putCounterO2, atClient);
       }
     }
 
@@ -141,12 +141,12 @@ Future<void> iotListen(
       lastO2SatDoubleValue = o2SatDoubleValue;
 
       await shareO2Sat(
-          o2SatDoubleValue, atsign, toAtsign, putCounterO2, atClient);
+       atClientManager, o2SatDoubleValue, atsign, toAtsign, putCounterO2, atClient);
     }
   });
 }
 
-Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign,
+Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate, String atsign, String toAtsign,
     int putCounterHR, AtClient atClient) async {
   String heartRateAsString = heartRate.toStringAsFixed(1);
   logger.info('Heart Rate: $heartRateAsString');
@@ -168,7 +168,7 @@ Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign,
   logger.info('calling atClient.put for HeartRate #$thisHRPutNo');
   // If you prefer the autonotification method
   //await atClient.put(key, heartRateAsString);
-  AtClientManager atClientManager = AtClientManager.getInstance();
+
 
   NotificationService notificationService = atClientManager.notificationService;
 
@@ -178,7 +178,7 @@ Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign,
   logger.info('atClient.put #$thisHRPutNo complete');
 }
 
-Future<void> shareO2Sat(double o2Sat, String atsign, String toAtsign,
+Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat, String atsign, String toAtsign,
     int putCounterO2, AtClient atClient) async {
   String o2SatAsString = o2Sat.toStringAsFixed(1);
   logger.info('Blood Oxygen: $o2SatAsString');
@@ -200,7 +200,7 @@ Future<void> shareO2Sat(double o2Sat, String atsign, String toAtsign,
   logger.info('calling atClient.put for O2 #$thisO2PutNo');
   // If you prefer the autonotification method
   // await atClient.put(key, o2SatAsString);
-  AtClientManager atClientManager = AtClientManager.getInstance();
+
 
   NotificationService notificationService = atClientManager.notificationService;
 

@@ -12,9 +12,15 @@ environment:
 #      path: at_lookup
 #      ref: quickFixAtLookupRaceCondition
 #
+dependency_overrides:
+  at_client:
+    git:
+      url: https://github.com/atsign-foundation/at_client_sdk.git
+      path: at_client
+      ref: sync_service_modifications
 dependencies:
   cupertino_icons: ^1.0.2
-  at_client_mobile: 3.1.5
+  at_client_mobile: ^3.1.5
   at_onboarding_flutter: ^3.0.1
   at_utils: ^3.0.0
   path_provider: ^2.0.5

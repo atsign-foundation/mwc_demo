@@ -14,7 +14,7 @@ dev_dependencies:
   lints: ^1.0.0
 dependencies: 
   at_client: 3.0.9
-  at_utils: 3.0.5
+  at_utils: 3.0.6
   
   image: ^3.1.1
   mqtt_client: ^9.6.5
@@ -26,3 +26,8 @@ dependency_overrides:
   #     url: https://github.com/atsign-foundation/at_libraries.git
   #     path: at_lookup
   #     ref: quickFixAtLookupRaceCondition
+  at_client:
+    git:
+      url: https://github.com/atsign-foundation/at_client_sdk.git
+      path: at_client
+      ref: sync_service_modifications

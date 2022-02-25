@@ -39,10 +39,12 @@ packages:
   at_client:
     dependency: "direct main"
     description:
-      name: at_client
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.9"
+      path: at_client
+      ref: sync_service_modifications
+      resolved-ref: "91f283948e7c7b1f1299406b3ac1a1cda9ee7df6"
+      url: "https://github.com/atsign-foundation/at_client_sdk.git"
+    source: git
+    version: "3.0.10"
   at_commons:
     dependency: transitive
     description:
@@ -56,14 +58,14 @@ packages:
       name: at_lookup
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.8"
+    version: "3.0.10"
   at_persistence_secondary_server:
     dependency: transitive
     description:
       name: at_persistence_secondary_server
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.15"
+    version: "3.0.16"
   at_persistence_spec:
     dependency: transitive
     description:
@@ -84,7 +86,7 @@ packages:
       name: at_utils
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.6"
   charcode:
     dependency: transitive
     description:
