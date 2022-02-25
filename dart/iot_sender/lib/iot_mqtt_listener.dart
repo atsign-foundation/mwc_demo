@@ -6,6 +6,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:at_client/at_client.dart';
 import 'package:at_commons/at_commons.dart';
+import 'package:at_client/src/service/notification_service.dart';
 
 final client = MqttServerClient('localhost', '');
 final AtSignLogger logger = AtSignLogger('iotListen');
@@ -15,7 +16,8 @@ Random random = Random();
 int fakeO2IntMinValue = 950;
 int fakeO2IntMaxValue = 995;
 // fakeO2 value in int, convert to double by dividing by 10 when publishing
-int currentFakeO2IntValue = random.nextInt(fakeO2IntMaxValue-fakeO2IntMinValue) + fakeO2IntMinValue;
+int currentFakeO2IntValue =
+    random.nextInt(fakeO2IntMaxValue - fakeO2IntMinValue) + fakeO2IntMinValue;
 
 int getNextFakeO2IntValue() {
   // get random int in range -5..+5
@@ -31,7 +33,8 @@ int getNextFakeO2IntValue() {
   return currentFakeO2IntValue;
 }
 
-Future<void> iotListen(AtClient atClient, String atsign, String toAtsign) async {
+Future<void> iotListen(
+    AtClient atClient, String atsign, String toAtsign) async {
   client.logging(on: false);
   client.setProtocolV311();
   client.keepAlivePeriod = 20;
@@ -59,7 +62,8 @@ Future<void> iotListen(AtClient atClient, String atsign, String toAtsign) async 
     logger.info('Mosquitto client connected');
   } else {
     /// Use status here rather than state if you also want the broker return code.
-    logger.severe('ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+    logger.severe(
+        'ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
     client.disconnect();
     exit(-1);
   }
@@ -69,17 +73,28 @@ Future<void> iotListen(AtClient atClient, String atsign, String toAtsign) async 
     ..isPublic = false
     ..isEncrypted = true
     ..namespaceAware = true
-    ..ttl = 100000;
+    ..ttr = -1
+    ..ttl = 90000;
 
   var key = AtKey()
     ..key = 'mwc_hr'
     ..sharedBy = atsign
     ..sharedWith = toAtsign
     ..metadata = metaData;
+// Check things are in good shape and reset those gauges by send a 0
+  logger.info(
+      'calling atClient.put for HeartRate to ensure AtClient connection goes through authorization exchange');
+   await atClient.put(key, '0.0');
+    key = AtKey()
+    ..key = 'mwc_o2'
+    ..sharedBy = atsign
+    ..sharedWith = toAtsign
+    ..metadata = metaData;
+    await atClient.put(key, '0.0');
 
-  logger.info('calling atClient.put for HeartRate to ensure AtClient connection goes through authorization exchange');
-  await atClient.put(key, '42.0');
-  logger.info('Initial put complete, AtClient connection should now be authorized');
+
+  logger.info(
+      'Initial put complete, AtClient connection should now be authorized');
 
   /// Ok, lets try a subscription
   logger.info('Subscribing to the mqtt/mwc_hr topic');
@@ -100,20 +115,23 @@ Future<void> iotListen(AtClient atClient, String atsign, String toAtsign) async 
   //  which is reading from that Queue and doing the actual work
   client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) async {
     final recMess = c![0].payload as MqttPublishMessage;
-    final pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+    final pt =
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
     if (c[0].topic == "mqtt/mwc_hr") {
       double? heartRateDoubleValue = double.tryParse(pt);
       heartRateDoubleValue ??= lastHeartRateDoubleValue;
       lastHeartRateDoubleValue = heartRateDoubleValue;
 
-      await shareHeartRate(heartRateDoubleValue, atsign, toAtsign, putCounterHR, atClient);
+      await shareHeartRate(
+          heartRateDoubleValue, atsign, toAtsign, putCounterHR, atClient);
 
       if (fakingO2SatValues) {
         // get random int between 0 and 101, then subtract 50 to get a number in range -50..+50
         currentFakeO2IntValue = getNextFakeO2IntValue();
-        double fakeO2DoubleValue = currentFakeO2IntValue/10;
-        await shareO2Sat(fakeO2DoubleValue, atsign, toAtsign, putCounterO2, atClient);
+        double fakeO2DoubleValue = currentFakeO2IntValue / 10;
+        await shareO2Sat(
+            fakeO2DoubleValue, atsign, toAtsign, putCounterO2, atClient);
       }
     }
 
@@ -122,12 +140,14 @@ Future<void> iotListen(AtClient atClient, String atsign, String toAtsign) async 
       o2SatDoubleValue ??= lastO2SatDoubleValue;
       lastO2SatDoubleValue = o2SatDoubleValue;
 
-      await shareO2Sat(o2SatDoubleValue, atsign, toAtsign, putCounterO2, atClient);
+      await shareO2Sat(
+          o2SatDoubleValue, atsign, toAtsign, putCounterO2, atClient);
     }
   });
 }
 
-Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign, int putCounterHR, AtClient atClient) async {
+Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign,
+    int putCounterHR, AtClient atClient) async {
   String heartRateAsString = heartRate.toStringAsFixed(1);
   logger.info('Heart Rate: $heartRateAsString');
 
@@ -135,7 +155,8 @@ Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign, in
     ..isPublic = false
     ..isEncrypted = true
     ..namespaceAware = true
-    ..ttl = 100000;
+    ..ttr = -1
+    ..ttl = 90000;
 
   var key = AtKey()
     ..key = 'mwc_hr'
@@ -145,11 +166,20 @@ Future<void> shareHeartRate(double heartRate, String atsign, String toAtsign, in
 
   int thisHRPutNo = ++putCounterHR;
   logger.info('calling atClient.put for HeartRate #$thisHRPutNo');
-  await atClient.put(key, heartRateAsString);
+  // If you prefer the autonotification method
+  //await atClient.put(key, heartRateAsString);
+  AtClientManager atClientManager = AtClientManager.getInstance();
+
+  NotificationService notificationService = atClientManager.notificationService;
+
+  NotificationResult notificationResponse = await notificationService
+      .notify(NotificationParams.forUpdate(key, value: heartRateAsString));
+  logger.info(notificationResponse.toString());
   logger.info('atClient.put #$thisHRPutNo complete');
 }
 
-Future<void> shareO2Sat(double o2Sat, String atsign, String toAtsign, int putCounterO2, AtClient atClient) async {
+Future<void> shareO2Sat(double o2Sat, String atsign, String toAtsign,
+    int putCounterO2, AtClient atClient) async {
   String o2SatAsString = o2Sat.toStringAsFixed(1);
   logger.info('Blood Oxygen: $o2SatAsString');
 
@@ -157,7 +187,8 @@ Future<void> shareO2Sat(double o2Sat, String atsign, String toAtsign, int putCou
     ..isPublic = false
     ..isEncrypted = true
     ..namespaceAware = true
-    ..ttl = 100000;
+    ..ttr = -1
+    ..ttl = 90000;
 
   var key = AtKey()
     ..key = 'mwc_o2'
@@ -167,7 +198,15 @@ Future<void> shareO2Sat(double o2Sat, String atsign, String toAtsign, int putCou
 
   int thisO2PutNo = ++putCounterO2;
   logger.info('calling atClient.put for O2 #$thisO2PutNo');
-  await atClient.put(key, o2SatAsString);
+  // If you prefer the autonotification method
+  // await atClient.put(key, o2SatAsString);
+  AtClientManager atClientManager = AtClientManager.getInstance();
+
+  NotificationService notificationService = atClientManager.notificationService;
+
+  NotificationResult notificationResponse = await notificationService
+      .notify(NotificationParams.forUpdate(key, value: o2SatAsString));
+ logger.info(notificationResponse.toString());
   logger.info('atClient.put #$thisO2PutNo complete');
 }
 
@@ -179,10 +218,12 @@ void onSubscribed(String topic) {
 /// The unsolicited disconnect callback
 void onDisconnected() {
   logger.info('OnDisconnected client callback - Client disconnection');
-  if (client.connectionStatus!.disconnectionOrigin == MqttDisconnectionOrigin.solicited) {
+  if (client.connectionStatus!.disconnectionOrigin ==
+      MqttDisconnectionOrigin.solicited) {
     logger.info('OnDisconnected callback is solicited, this is correct');
   } else {
-    logger.severe('OnDisconnected callback is unsolicited or none, this is incorrect - exiting');
+    logger.severe(
+        'OnDisconnected callback is unsolicited or none, this is incorrect - exiting');
     exit(-1);
   }
 }

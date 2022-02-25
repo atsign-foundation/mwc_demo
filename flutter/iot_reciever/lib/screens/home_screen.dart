@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .subscribe(regex: AtEnv.appNamespace)
         .listen((notification) {
       _logger.info(
-          'notification subscription handler got notification with key ${notification.key}');
+          'notification subscription handler got notification with key ${notification.toJson().toString()}');
       getAtsignData(context, notification.key);
     });
     // reset dials if no data comes in checkExpiry(int Seconds)
