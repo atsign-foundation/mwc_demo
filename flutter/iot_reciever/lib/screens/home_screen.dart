@@ -65,11 +65,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     notificationService
         .subscribe(regex: AtEnv.appNamespace)
-        .listen((notification) {
+        .listen(
+       ((data) {
+      print('DATA');
+      print(data.toString());
       _logger.info(
-          'notification subscription handler got notification with key ${notification.toJson().toString()}');
-      getAtsignData(context, atClient, notification.key);
-    });
+          'notification subscription handler got notification with key ${data.toJson().toString()}');
+      getAtsignData(context, atClient, data.key);
+
+    }), onError: (e) => _logger.severe('Notification Failed:' + e.toString()),
+    onDone: () => _logger.info('Notification listerner stopped') 
+    );
     // reset dials if no data comes in checkExpiry(int Seconds)
     timer = Timer.periodic(
         const Duration(seconds: 1), (Timer t) => checkExpiry(90));

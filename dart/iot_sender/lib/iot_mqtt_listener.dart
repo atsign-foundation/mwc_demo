@@ -12,8 +12,6 @@ import 'package:at_client/src/service/notification_service.dart';
 final client = MqttServerClient('localhost', '');
 final AtSignLogger logger = AtSignLogger('iotListen');
 
-
-
 Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
     String atsign, String ownerAtsign) async {
   client.logging(on: false);
@@ -52,17 +50,17 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
   logger.info(
       'calling share methods for HeartRate/O2 to ensure AtClient connection goes through authorization exchange');
 
-      var sendHR = ['@colin', '@ai6bh'];
+  var sendHR = ['@colin', '@ai6bh'];
 
-      for (var sendTo in sendHR) {
-        shareHeartRate(atClientManager, 0.0 , atsign, sendTo, 1, atClient);
-      }
+  for (var sendTo in sendHR) {
+    shareHeartRate(atClientManager, 0.0, atsign, sendTo, 1, atClient);
+  }
 
-       var sendO2 = ['@colin', '@ai6bh'];
+  var sendO2 = ['@colin', '@ai6bh'];
 
-      for (var sendTo in sendO2) {
-        shareO2Sat(atClientManager, 0.0, atsign, sendTo, 1, atClient);
-      }
+  for (var sendTo in sendO2) {
+    shareO2Sat(atClientManager, 0.0, atsign, sendTo, 1, atClient);
+  }
   logger.info(
       'Initial put complete, AtClient connection should now be authorized');
 
@@ -96,10 +94,9 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
       var sendHR = ['@colin', '@ai6bh'];
 
       for (var sendTo in sendHR) {
-        shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
+      await  shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
             putCounterHR, atClient);
       }
-
     }
 
     if (c[0].topic == "mqtt/mwc_o2") {
@@ -110,7 +107,7 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
       var sendO2 = ['@colin', '@ai6bh'];
 
       for (var sendTo in sendO2) {
-        shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
+       await shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
             putCounterO2, atClient);
       }
     }
@@ -140,12 +137,17 @@ Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate,
   // If you prefer the autonotification method
   //await atClient.put(key, heartRateAsString);
   // logger.info('atClient.put #$thisHRPutNo complete');
-
+try{
   NotificationService notificationService = atClientManager.notificationService;
 
   NotificationResult notificationResponse = await notificationService
-      .notify(NotificationParams.forUpdate(key, value: heartRateAsString));
+      .notify(NotificationParams.forUpdate(key, value: heartRateAsString),
+      onSuccess: (notification) => logger.info('SUCCESS:' + notification.toString() + ' ' + heartRateAsString),
+      onError: (notification) => logger.info('ERROR:' + notification.toString()+ ' ' + heartRateAsString));
   logger.info(notificationResponse.toString());
+    } catch (e) {
+    print(e.toString());
+  }
 }
 
 Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat,
@@ -171,12 +173,26 @@ Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat,
   // If you prefer the autonotification method
   // await atClient.put(key, o2SatAsString);
   // logger.info('atClient.put #$thisO2PutNo complete');
+  try {
+    NotificationService notificationService =
+        atClientManager.notificationService;
 
-  NotificationService notificationService = atClientManager.notificationService;
 
   NotificationResult notificationResponse = await notificationService
-      .notify(NotificationParams.forUpdate(key, value: o2SatAsString));
+      .notify(NotificationParams.forUpdate(key, value: o2SatAsString),
+      onSuccess: (notification) => logger.info('SUCCESS:' + notification.toString() + ' ' + o2SatAsString),
+      onError: (notification) => logger.info('ERROR:' + notification.toString()+ ' ' + o2SatAsString));
   logger.info(notificationResponse.toString());
+    } catch (e) {
+    print(e.toString());
+  }
+
+  //   NotificationResult notificationResponse = await notificationService
+  //       .notify(NotificationParams.forUpdate(key, value: o2SatAsString));
+  //   logger.info(notificationResponse.toString());
+  // } catch (e) {
+  //   print(e.toString());
+  // }
 }
 
 /// The subscribed callback
