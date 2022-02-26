@@ -339,7 +339,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void getAtsignData(
       BuildContext context, AtClient atClient, String notificationKey) async {
-
     //Split the notification to get the key and the sharedByAtsign
     // Notification looks like this :-
     // @ai6bh:snackbar.colin@colin
@@ -364,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ..metadata = metaData;
 
     // The magic line that picks up the snack
+    //sleep(Duration(seconds: 1));
     var reading = await atClient.get(key);
     // Yes that is all you need to do!
     var value = reading.value.toString();

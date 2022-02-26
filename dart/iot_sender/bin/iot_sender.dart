@@ -8,7 +8,7 @@ import 'dart:io';
 
 void main(List<String> arguments) async {
   if (arguments.isEmpty || arguments.length < 2) {
-    print('Usage: iot_sender <sender @sign> <receiver @sign>');
+    print('Usage: iot_sender <iot @sign> <owners @sign>');
     exit(0);
   }
 
@@ -17,7 +17,7 @@ void main(List<String> arguments) async {
   final AtSignLogger logger = AtSignLogger('iot_sender');
 
   String atsign = arguments[0];
-  String toAtsign = arguments[1];
+  String ownerAtsign = arguments[1];
 
   OnboardingService onboardingService = OnboardingService(atsign);
   await onboardingService.authenticate();
@@ -78,8 +78,8 @@ void main(List<String> arguments) async {
 
   logger.info('OK Ready');
 
-  logger.info("calling iotListen atSign '$atsign', toAtSign '$toAtsign'");
+  logger.info("calling iotListen atSign '$atsign', ownerAtSign '$ownerAtsign'");
 
-  iotListen(atClientManager, atClient, atsign, toAtsign);
+  iotListen(atClientManager, atClient, atsign, ownerAtsign);
   print('listening');
 }

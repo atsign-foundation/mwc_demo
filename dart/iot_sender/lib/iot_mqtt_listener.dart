@@ -12,30 +12,10 @@ import 'package:at_client/src/service/notification_service.dart';
 final client = MqttServerClient('localhost', '');
 final AtSignLogger logger = AtSignLogger('iotListen');
 
-bool fakingO2SatValues = false;
-Random random = Random();
-int fakeO2IntMinValue = 950;
-int fakeO2IntMaxValue = 995;
-// fakeO2 value in int, convert to double by dividing by 10 when publishing
-int currentFakeO2IntValue =
-    random.nextInt(fakeO2IntMaxValue - fakeO2IntMinValue) + fakeO2IntMinValue;
 
-int getNextFakeO2IntValue() {
-  // get random int in range -5..+5
-  // so the double value will have a change delta of -0.5 to +0.5
-  int fakeO2Delta = random.nextInt(11) - 5;
 
-  currentFakeO2IntValue += fakeO2Delta;
-  if (currentFakeO2IntValue > fakeO2IntMaxValue) {
-    currentFakeO2IntValue = fakeO2IntMaxValue;
-  } else if (currentFakeO2IntValue < fakeO2IntMinValue) {
-    currentFakeO2IntValue = fakeO2IntMinValue;
-  }
-  return currentFakeO2IntValue;
-}
-
-Future<void> iotListen(
-     AtClientManager atClientManager, AtClient atClient, String atsign, String toAtsign) async {
+Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
+    String atsign, String ownerAtsign) async {
   client.logging(on: false);
   client.setProtocolV311();
   client.keepAlivePeriod = 20;
@@ -69,31 +49,20 @@ Future<void> iotListen(
     exit(-1);
   }
 
-  /// Let's get the atClient connection authorized before we go any further
-  var metaData = Metadata()
-    ..isPublic = false
-    ..isEncrypted = true
-    ..namespaceAware = true
-    ..ttr = -1
-    ..ttl = 90000;
-
-  var key = AtKey()
-    ..key = 'mwc_hr'
-    ..sharedBy = atsign
-    ..sharedWith = toAtsign
-    ..metadata = metaData;
-// Check things are in good shape and reset those gauges by send a 0
   logger.info(
-      'calling atClient.put for HeartRate to ensure AtClient connection goes through authorization exchange');
-   await atClient.put(key, '0.0');
-    key = AtKey()
-    ..key = 'mwc_o2'
-    ..sharedBy = atsign
-    ..sharedWith = toAtsign
-    ..metadata = metaData;
-    await atClient.put(key, '0.0');
+      'calling share methods for HeartRate/O2 to ensure AtClient connection goes through authorization exchange');
 
+      var sendHR = ['@colin', '@ai6bh'];
 
+      for (var sendTo in sendHR) {
+        shareHeartRate(atClientManager, 0.0 , atsign, sendTo, 1, atClient);
+      }
+
+       var sendO2 = ['@colin', '@ai6bh'];
+
+      for (var sendTo in sendO2) {
+        shareO2Sat(atClientManager, 0.0, atsign, sendTo, 1, atClient);
+      }
   logger.info(
       'Initial put complete, AtClient connection should now be authorized');
 
@@ -124,16 +93,13 @@ Future<void> iotListen(
       heartRateDoubleValue ??= lastHeartRateDoubleValue;
       lastHeartRateDoubleValue = heartRateDoubleValue;
 
-      await shareHeartRate(
-          atClientManager, heartRateDoubleValue, atsign, toAtsign, putCounterHR, atClient);
+      var sendHR = ['@colin', '@ai6bh'];
 
-      if (fakingO2SatValues) {
-        // get random int between 0 and 101, then subtract 50 to get a number in range -50..+50
-        currentFakeO2IntValue = getNextFakeO2IntValue();
-        double fakeO2DoubleValue = currentFakeO2IntValue / 10;
-        await shareO2Sat(
-           atClientManager, fakeO2DoubleValue, atsign, toAtsign, putCounterO2, atClient);
+      for (var sendTo in sendHR) {
+        shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
+            putCounterHR, atClient);
       }
+
     }
 
     if (c[0].topic == "mqtt/mwc_o2") {
@@ -141,14 +107,18 @@ Future<void> iotListen(
       o2SatDoubleValue ??= lastO2SatDoubleValue;
       lastO2SatDoubleValue = o2SatDoubleValue;
 
-      await shareO2Sat(
-       atClientManager, o2SatDoubleValue, atsign, toAtsign, putCounterO2, atClient);
+      var sendO2 = ['@colin', '@ai6bh'];
+
+      for (var sendTo in sendO2) {
+        shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
+            putCounterO2, atClient);
+      }
     }
   });
 }
 
-Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate, String atsign, String toAtsign,
-    int putCounterHR, AtClient atClient) async {
+Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate,
+    String atsign, String toAtsign, int putCounterHR, AtClient atClient) async {
   String heartRateAsString = heartRate.toStringAsFixed(1);
   logger.info('Heart Rate: $heartRateAsString');
 
@@ -176,11 +146,10 @@ Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate, S
   NotificationResult notificationResponse = await notificationService
       .notify(NotificationParams.forUpdate(key, value: heartRateAsString));
   logger.info(notificationResponse.toString());
-
 }
 
-Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat, String atsign, String toAtsign,
-    int putCounterO2, AtClient atClient) async {
+Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat,
+    String atsign, String toAtsign, int putCounterO2, AtClient atClient) async {
   String o2SatAsString = o2Sat.toStringAsFixed(1);
   logger.info('Blood Oxygen: $o2SatAsString');
 
@@ -207,8 +176,7 @@ Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat, String at
 
   NotificationResult notificationResponse = await notificationService
       .notify(NotificationParams.forUpdate(key, value: o2SatAsString));
- logger.info(notificationResponse.toString());
-
+  logger.info(notificationResponse.toString());
 }
 
 /// The subscribed callback
