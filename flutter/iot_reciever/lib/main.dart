@@ -32,9 +32,10 @@ Future<AtClientPreference> loadAtClientPreference() async {
 
   return AtClientPreference()
     // these can be added once in the main release
-    // ..syncRequestTriggerInSeconds = 1
-    // ..syncRequestThreshold = 1
-    // ..syncRunIntervalSeconds = 1
+    ..syncRequestTriggerInSeconds = 1
+    ..syncRequestThreshold = 1
+    ..syncRunIntervalSeconds = 1
+    ..syncPageLimit = 10
     ..rootDomain = AtEnv.rootDomain
     ..namespace = AtEnv.appNamespace
     ..hiveStoragePath = dir.path

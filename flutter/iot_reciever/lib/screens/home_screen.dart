@@ -8,6 +8,8 @@ import 'package:at_utils/at_logger.dart';
 
 import 'package:at_client_mobile/at_client_mobile.dart';
 import 'package:at_commons/at_commons.dart';
+import 'package:at_client/src/decryption_service/decryption_manager.dart';
+
 import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:flutter/material.dart';
@@ -63,19 +65,13 @@ class _HomeScreenState extends State<HomeScreen> {
     atClientManager.syncService.sync(onDone: () {
       _logger.info('sync complete');
     });
-    notificationService
-        .subscribe(regex: AtEnv.appNamespace)
-        .listen(
-       ((data) {
-      print('DATA');
-      print(data.toString());
+    notificationService.subscribe(regex: AtEnv.appNamespace).listen(((data) {
       _logger.info(
           'notification subscription handler got notification with key ${data.toJson().toString()}');
-      getAtsignData(context, atClient, data.key);
-
-    }), onError: (e) => _logger.severe('Notification Failed:' + e.toString()),
-    onDone: () => _logger.info('Notification listerner stopped') 
-    );
+      getAtsignData(context, atClient, data);
+    }),
+        onError: (e) => _logger.severe('Notification Failed:' + e.toString()),
+        onDone: () => _logger.info('Notification listerner stopped'));
     // reset dials if no data comes in checkExpiry(int Seconds)
     timer = Timer.periodic(
         const Duration(seconds: 1), (Timer t) => checkExpiry(90));
@@ -343,56 +339,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void getAtsignData(
-      BuildContext context, AtClient atClient, String notificationKey) async {
-    //Split the notification to get the key and the sharedByAtsign
-    // Notification looks like this :-
-    // @ai6bh:snackbar.colin@colin
-    var notificationList = notificationKey.split(':');
-    String sharedByAtsign = '@' + notificationList[1].split('@').last;
-    String keyAtsign = notificationList[1];
+  void getAtsignData(BuildContext context, AtClient atClient,
+      AtNotification notification) async {
+    String sharedByAtsign = notification.from;
+// I little string manipulation to find the key being used
+// This will tell us what the value represents once decryptyed
+    String keyAtsign = notification.key;
+    keyAtsign = keyAtsign.replaceAll(notification.to + ':', '');
+    keyAtsign =
+        keyAtsign.replaceAll('.' + AtEnv.appNamespace + notification.from, '');
     var currentAtsign = atClient.getCurrentAtSign().toString();
-    String nameSpace = AtEnv.appNamespace;
-    keyAtsign = keyAtsign.replaceAll(".$nameSpace$sharedByAtsign", '');
 
-    print(keyAtsign + ' ' + sharedByAtsign + ' ' + currentAtsign);
+    var atKey = AtKey()
+      ..key = notification.key
+      ..sharedBy = notification.from
+      ..sharedWith = notification.to;
+// Get the decryption key to decrypt the value in the notification object
+    var decryptionService =  AtKeyDecryptionManager.get(atKey, notification.to);
+// Decrypt it
+    var value = await decryptionService.decrypt(atKey, notification.value);
 
-    var metaData = Metadata()
-      ..isPublic = false
-      ..isEncrypted = true
-      ..namespaceAware = true;
-
-    var key = AtKey()
-      ..key = keyAtsign
-      ..sharedBy = sharedByAtsign
-      ..sharedWith = currentAtsign
-      ..metadata = metaData;
-
-    // The magic line that picks up the snack
-    //sleep(Duration(seconds: 1));
-    var reading = await atClient.get(key);
-    // Yes that is all you need to do!
-    var value = reading.value.toString();
     if (keyAtsign == 'mwc_hr') {
       readings.heartRate = value;
       // Use this for created at source (reader)
-      //readings.heartTime = reading.metadata?.createdAt?.toString();
-      // Or this f client got the reading (safer for demos!)
       readings.heartTime = DateTime.now().toUtc().toString();
     }
     if (keyAtsign == 'mwc_o2') {
       readings.bloodOxygen = value;
       // Use this for created at source (reader)
-      // readings.oxygenTime = reading.metadata?.createdAt?.toString();
-      //Or this f client got the reading (safer for demos!)
       readings.oxygenTime = DateTime.now().toUtc().toString();
     }
     // Use this for created at source (reader)
 
-    //Or this f client got the reading (safer for demos!)
-    var createdAt = reading.metadata?.createdAt;
+    //Or this for when client got the reading 
+    var createdAt =
+        DateTime.fromMillisecondsSinceEpoch(notification.epochMillis);
     var dateFormat = DateFormat("HH:mm.ss");
-    String dateFormated = dateFormat.format(createdAt!);
+    String dateFormated = dateFormat.format(createdAt);
     readings.sensorName = '$dateFormated UTC | $sharedByAtsign';
     if (mounted) {
       setState(() {});

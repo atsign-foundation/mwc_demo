@@ -19,9 +19,12 @@ dependencies:
   mqtt_client: ^9.6.5
   zxing2: ^0.1.0
 
+
 dependency_overrides:
-  # at_lookup:
-  #   git:
-  #     url: https://github.com/atsign-foundation/at_libraries.git
-  #     path: at_lookup
-  #     ref: quickFixAtLookupRaceCondition
+  at_client:
+    git:
+      url: https://github.com/atsign-foundation/at_client_sdk.git
+      path: at_client
+      ref: sync_service_modifications
+
+

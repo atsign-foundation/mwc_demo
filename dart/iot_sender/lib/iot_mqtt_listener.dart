@@ -94,7 +94,7 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
       var sendHR = ['@colin', '@ai6bh'];
 
       for (var sendTo in sendHR) {
-      await  shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
+        shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
             putCounterHR, atClient);
       }
     }
@@ -107,7 +107,7 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
       var sendO2 = ['@colin', '@ai6bh'];
 
       for (var sendTo in sendO2) {
-       await shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
+        shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
             putCounterO2, atClient);
       }
     }
