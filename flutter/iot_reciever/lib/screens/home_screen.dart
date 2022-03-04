@@ -66,8 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _logger.info('sync complete');
     });
     notificationService.subscribe(regex: AtEnv.appNamespace).listen(((data) {
-      _logger.info(
-          'notification subscription handler got notification with key ${data.toJson().toString()}');
+      // _logger.info(
+      //     'notification subscription handler got notification with key ${data.toJson().toString()}');
       getAtsignData(context, atClient, data);
     }),
         onError: (e) => _logger.severe('Notification Failed:' + e.toString()),
@@ -377,11 +377,12 @@ class _HomeScreenState extends State<HomeScreen> {
     var dateFormat = DateFormat("HH:mm.ss");
     String dateFormated = dateFormat.format(createdAt);
     readings.sensorName = '$dateFormated UTC | $sharedByAtsign';
+        _logger.info(
+        'Yay $currentAtsign was just sent a $keyAtsign reading of $value ! From $sharedByAtsign');
     if (mounted) {
       setState(() {});
     }
-    _logger.info(
-        'Yay $currentAtsign was just sent a $keyAtsign reading of $value ! From $sharedByAtsign');
+
   }
 
   void checkExpiry(int expireSeconds) {

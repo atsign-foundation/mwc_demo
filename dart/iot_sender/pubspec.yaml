@@ -20,11 +20,11 @@ dependencies:
   zxing2: ^0.1.0
 
 
-dependency_overrides:
-  at_client:
-    git:
-      url: https://github.com/atsign-foundation/at_client_sdk.git
-      path: at_client
-      ref: sync_service_modifications
+# dependency_overrides:
+#   at_client:
+#     git:
+#       url: https://github.com/atsign-foundation/at_client_sdk.git
+#       path: at_client
+#       ref: sync_service_modifications
 
 

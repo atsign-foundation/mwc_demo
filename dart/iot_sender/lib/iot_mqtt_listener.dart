@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:at_utils/at_utils.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -23,7 +22,13 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
 
   double lastHeartRateDoubleValue = 0.0;
   double lastO2SatDoubleValue = 0.0;
+  AtClientPreference? atClientPreference =
+      atClientManager.atClient.getPreferences();
+  String rootDomain = atClientPreference!.rootDomain.toString();
+  String rootPort = atClientPreference.rootPort.toString();
 
+
+ 
   try {
     await client.connect();
   } on NoConnectionException catch (e) {
@@ -94,7 +99,14 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
       var sendHR = ['@colin', '@ai6bh'];
 
       for (var sendTo in sendHR) {
-        shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
+        try {
+          await AtClientUtil.findSecondary(sendTo, rootDomain, int.parse(rootPort));
+        } catch (e) {
+          logger.warning(e.toString());
+          continue;
+        }
+
+      await  shareHeartRate(atClientManager, heartRateDoubleValue, atsign, sendTo,
             putCounterHR, atClient);
       }
     }
@@ -104,10 +116,17 @@ Future<void> iotListen(AtClientManager atClientManager, AtClient atClient,
       o2SatDoubleValue ??= lastO2SatDoubleValue;
       lastO2SatDoubleValue = o2SatDoubleValue;
 
-      var sendO2 = ['@colin', '@ai6bh'];
+      var sendO2 = ['@colin'];
 
       for (var sendTo in sendO2) {
-        shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
+        try {
+          await AtClientUtil.findSecondary(sendTo,
+              AtClientPreference().rootDomain, AtClientPreference().rootPort);
+        } catch (e) {
+          logger.warning(e.toString());
+          continue;
+        }
+        await  shareO2Sat(atClientManager, o2SatDoubleValue, atsign, sendTo,
             putCounterO2, atClient);
       }
     }
@@ -133,19 +152,22 @@ Future<void> shareHeartRate(AtClientManager atClientManager, double heartRate,
     ..metadata = metaData;
 
   int thisHRPutNo = ++putCounterHR;
-  logger.info('calling atClient.put for HeartRate #$thisHRPutNo');
+  logger.info('Sendng Notification of HeartRate #$thisHRPutNo');
   // If you prefer the autonotification method
   //await atClient.put(key, heartRateAsString);
   // logger.info('atClient.put #$thisHRPutNo complete');
-try{
-  NotificationService notificationService = atClientManager.notificationService;
+  try {
+    NotificationService notificationService =
+        atClientManager.notificationService;
 
-  NotificationResult notificationResponse = await notificationService
-      .notify(NotificationParams.forUpdate(key, value: heartRateAsString),
-      onSuccess: (notification) => logger.info('SUCCESS:' + notification.toString() + ' ' + heartRateAsString),
-      onError: (notification) => logger.info('ERROR:' + notification.toString()+ ' ' + heartRateAsString));
-  logger.info(notificationResponse.toString());
-    } catch (e) {
+    NotificationResult notificationResponse = await notificationService.notify(
+        NotificationParams.forUpdate(key, value: heartRateAsString),
+        onSuccess: (notification) => logger.info(
+            'SUCCESS:' + notification.toString() + ' ' + heartRateAsString),
+        onError: (notification) => logger.info(
+            'ERROR:' + notification.toString() + ' ' + heartRateAsString));
+    logger.info(notificationResponse.toString());
+  } catch (e) {
     print(e.toString());
   }
 }
@@ -169,7 +191,7 @@ Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat,
     ..metadata = metaData;
 
   int thisO2PutNo = ++putCounterO2;
-  logger.info('calling atClient.put for O2 #$thisO2PutNo');
+  logger.info('Sendng Notification of O2 #$thisO2PutNo');
   // If you prefer the autonotification method
   // await atClient.put(key, o2SatAsString);
   // logger.info('atClient.put #$thisO2PutNo complete');
@@ -177,22 +199,17 @@ Future<void> shareO2Sat(AtClientManager atClientManager, double o2Sat,
     NotificationService notificationService =
         atClientManager.notificationService;
 
-
-  NotificationResult notificationResponse = await notificationService
-      .notify(NotificationParams.forUpdate(key, value: o2SatAsString),
-      onSuccess: (notification) => logger.info('SUCCESS:' + notification.toString() + ' ' + o2SatAsString),
-      onError: (notification) => logger.info('ERROR:' + notification.toString()+ ' ' + o2SatAsString));
-  logger.info(notificationResponse.toString());
-    } catch (e) {
+    NotificationResult notificationResponse = await notificationService.notify(
+        NotificationParams.forUpdate(key, value: o2SatAsString),
+        onSuccess: (notification) => logger
+            .info('SUCCESS:' + notification.toString() + ' ' + o2SatAsString),
+        onError: (notification) => logger
+            .info('ERROR:' + notification.toString() + ' ' + o2SatAsString));
+    logger.info(notificationResponse.toString());
+  } catch (e, stacktrace) {
     print(e.toString());
+    print(stacktrace.toString());
   }
-
-  //   NotificationResult notificationResponse = await notificationService
-  //       .notify(NotificationParams.forUpdate(key, value: o2SatAsString));
-  //   logger.info(notificationResponse.toString());
-  // } catch (e) {
-  //   print(e.toString());
-  // }
 }
 
 /// The subscribed callback

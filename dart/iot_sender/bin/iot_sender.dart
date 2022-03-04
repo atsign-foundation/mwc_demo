@@ -38,9 +38,9 @@ void main(List<String> arguments) async {
     ..privateKey = pkam
 
     // These can be added once in the main releases
-    ..syncRequestTriggerInSeconds = 1
-    ..syncRequestThreshold = 1
-    ..syncRunIntervalSeconds = 1
+    // ..syncRequestTriggerInSeconds = 1
+    // ..syncRequestThreshold = 1
+    // ..syncRunIntervalSeconds = 1
     ..syncPageLimit = 10
     ..rootDomain = 'root.atsign.org';
 
