@@ -117,25 +117,39 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             onSelected: (String result) {
               switch (result) {
-                case 'CLOSE':
+                case 'Exit':
                   exit(0);
-                //break;
+                case 'Review':
+                  print('Hello world');
+                  break;
                 default:
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               const PopupMenuItem<String>(
                 height: 20,
-                value: 'CLOSE',
+                value: 'Review',
                 child: Text(
-                  'CLOSE',
+                  'Review monitors',
                   style: TextStyle(
                       fontSize: 15,
                       letterSpacing: 5,
                       backgroundColor: Color.fromARGB(255, 108, 169, 197),
                       color: Colors.black),
                 ),
-              )
+              ),
+              const PopupMenuItem<String>(
+                height: 20,
+                value: 'Exit',
+                child: Text(
+                  'Close Application',
+                  style: TextStyle(
+                      fontSize: 15,
+                      letterSpacing: 5,
+                      backgroundColor: Color.fromARGB(255, 108, 169, 197),
+                      color: Colors.black),
+                ),
+              ),
             ],
           ),
         ],
@@ -355,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ..sharedBy = notification.from
       ..sharedWith = notification.to;
 // Get the decryption key to decrypt the value in the notification object
-    var decryptionService =  AtKeyDecryptionManager.get(atKey, notification.to);
+    var decryptionService = AtKeyDecryptionManager.get(atKey, notification.to);
 // Decrypt it
     var value = await decryptionService.decrypt(atKey, notification.value);
 
@@ -371,18 +385,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     // Use this for created at source (reader)
 
-    //Or this for when client got the reading 
+    //Or this for when client got the reading
     var createdAt =
         DateTime.fromMillisecondsSinceEpoch(notification.epochMillis);
     var dateFormat = DateFormat("HH:mm.ss");
     String dateFormated = dateFormat.format(createdAt);
     readings.sensorName = '$dateFormated UTC | $sharedByAtsign';
-        _logger.info(
+    _logger.info(
         'Yay $currentAtsign was just sent a $keyAtsign reading of $value ! From $sharedByAtsign');
     if (mounted) {
       setState(() {});
     }
-
   }
 
   void checkExpiry(int expireSeconds) {
