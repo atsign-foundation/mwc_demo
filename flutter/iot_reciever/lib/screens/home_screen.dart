@@ -2,8 +2,10 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:at_app_flutter/at_app_flutter.dart';
+import 'package:at_onboarding_flutter/utils/app_constants.dart';
 import 'package:at_utils/at_logger.dart';
 
 import 'package:at_client_mobile/at_client_mobile.dart';
@@ -89,7 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // var mediaQuery = MediaQuery.of(context);
     // var _width = mediaQuery.size.width * mediaQuery.devicePixelRatio;
     // var _height = mediaQuery.size.height * mediaQuery.devicePixelRatio;
-
+    TextEditingController _textFieldController = TextEditingController();
+    String valueText = "";
     int _gridRows = 1;
     if (_width > _height) {
       _gridRows = 2;
@@ -120,7 +123,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 case 'Exit':
                   exit(0);
                 case 'Review':
-                  print('Hello world');
+                  break;
+                case 'Set':
+                  showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                            title: const Text('Enter IoT @sign',style: TextStyle(fontWeight: FontWeight.bold),),
+                            content: TextField(
+                              onChanged: (value) {
+                                setState(() {
+                                  valueText = value;
+                                });
+                              },
+                              controller: _textFieldController,
+                              decoration: const InputDecoration(
+                                  hintText: "@alice"),
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                  style:   ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                                                        foregroundColor: MaterialStateProperty.all<Color>(Colors.black), ),
+                                  onPressed: () {
+                                    setState(() {
+                                      print(valueText);
+                                      Navigator.pop(context);
+                                    });
+                                  },
+                                  child: const Text('Enter'))
+                            ],
+                          ));
+                  print(valueText);
                   break;
                 default:
               }
@@ -130,7 +162,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 20,
                 value: 'Review',
                 child: Text(
-                  'Review monitors',
+                  'Set monitoring @signs',
+                  style: TextStyle(
+                      fontSize: 15,
+                      letterSpacing: 5,
+                      backgroundColor: Color.fromARGB(255, 108, 169, 197),
+                      color: Colors.black),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                height: 20,
+                value: 'Set',
+                child: Text(
+                  'Set IoT device @sign',
                   style: TextStyle(
                       fontSize: 15,
                       letterSpacing: 5,
