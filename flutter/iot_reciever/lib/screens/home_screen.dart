@@ -141,6 +141,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             actions: <Widget>[
                               TextButton(
+                                  style:   ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                                                        foregroundColor: MaterialStateProperty.all<Color>(Colors.black), ),
+                                  onPressed: () {
+                                    setState(() {
+                                      print(valueText);
+                                      Navigator.pop(context);
+                                    });
+                                  },
+                                  child: const Text('Cancel')),
+                              TextButton(
                                   style:   ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
                                                         foregroundColor: MaterialStateProperty.all<Color>(Colors.black), ),
                                   onPressed: () {
