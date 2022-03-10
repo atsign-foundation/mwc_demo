@@ -2,14 +2,13 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:at_app_flutter/at_app_flutter.dart';
-import 'package:at_onboarding_flutter/utils/app_constants.dart';
 import 'package:at_utils/at_logger.dart';
 
 import 'package:at_client_mobile/at_client_mobile.dart';
 import 'package:at_commons/at_commons.dart';
+// ignore: implementation_imports
 import 'package:at_client/src/decryption_service/decryption_manager.dart';
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -19,6 +18,7 @@ import 'package:intl/intl.dart';
 import 'package:iot_reciever/main.dart';
 import 'package:iot_reciever/models/iot_model.dart';
 import 'package:iot_reciever/widgets/Gaugewidget.dart';
+import 'package:iot_reciever/widgets/iot_atsign_dialog.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 
 final AtSignLogger _logger = AtSignLogger('HomeScreen');
@@ -125,43 +125,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 case 'Review':
                   break;
                 case 'Set':
-                  showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                            title: const Text('Enter IoT @sign',style: TextStyle(fontWeight: FontWeight.bold),),
-                            content: TextField(
-                              onChanged: (value) {
-                                setState(() {
-                                  valueText = value;
-                                });
-                              },
-                              controller: _textFieldController,
-                              decoration: const InputDecoration(
-                                  hintText: "@alice"),
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                  style:   ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                                                        foregroundColor: MaterialStateProperty.all<Color>(Colors.black), ),
-                                  onPressed: () {
-                                    setState(() {
-                                      print(valueText);
-                                      Navigator.pop(context);
-                                    });
-                                  },
-                                  child: const Text('Cancel')),
-                              TextButton(
-                                  style:   ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
-                                                        foregroundColor: MaterialStateProperty.all<Color>(Colors.black), ),
-                                  onPressed: () {
-                                    setState(() {
-                                      print(valueText);
-                                      Navigator.pop(context);
-                                    });
-                                  },
-                                  child: const Text('Enter'))
-                            ],
-                          ));
+                iotAtsignDialog(context, '@colin', 
+                  (newAtsign) {
+                    print (newAtsign+ "<<<<<<<");
+                    setState(() {
+                      Navigator.pop(context);
+                    });
+                });
+   
                   print(valueText);
                   break;
                 default:
