@@ -105,7 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
               switch (result) {
                 case 'CLOSE':
                   exit(0);
-                //break;
+                case 'DEVICES':
+                  Navigator.of(context).pushNamed(ReceiversScreen.id);
+                break;
                 default:
               }
             },
@@ -121,40 +123,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Color.fromARGB(255, 108, 169, 197),
                       color: Colors.black),
                 ),
-              )
+              ),
+                            const PopupMenuItem<String>(
+                height: 20,
+                value: 'DEVICES',
+                child: Text(
+                  'DEVICES',
+                  style: TextStyle(
+                      fontSize: 15,
+                      letterSpacing: 5,
+                      backgroundColor: Color.fromARGB(255, 108, 169, 197),
+                      color: Colors.black),
+                ),
+              ),
             ],
           ),
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(
-          color: Colors.white70,
-          gradient: _gridRows > 1
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color.fromARGB(255, 240, 181, 178),
-                    Color.fromARGB(255, 171, 200, 224)
-                  ],
-                )
-              : const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color.fromARGB(255, 240, 181, 178),
-                    Color.fromARGB(255, 171, 200, 224)
-                  ],
-                ),
-          image: const DecorationImage(
-            opacity: .15,
-            fit: BoxFit.cover,
-            alignment: Alignment.center,
-            image: AssetImage(
-              'assets/images/blood-pressure.png',
-            ),
-          ),
-        ),
+        decoration: backgroundGradient(_gridRows),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -351,16 +338,42 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  BoxDecoration backgroundGradient(int _gridRows) {
+    return BoxDecoration(
+        color: Colors.white70,
+        gradient: _gridRows > 1
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color.fromARGB(255, 240, 181, 178), Color.fromARGB(255, 171, 200, 224)],
+              )
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color.fromARGB(255, 240, 181, 178), Color.fromARGB(255, 171, 200, 224)],
+              ),
+        image: const DecorationImage(
+          opacity: .15,
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+          image: AssetImage(
+            'assets/images/blood-pressure.png',
+          ),
+        ),
+      );
+  }
+
   void getAtsignData(BuildContext context, AtNotification notification) async {
     var notificationJson = notification.toJson();
     var notificationKey = notificationJson['key'];
-    var keyAtsign = notificationKey.split(':');
+    print(notificationKey);
+    List keyAtsign = notificationKey.split(':');
     String sharedByAtsign = notificationJson['from'];
     String currentAtsign = notificationJson['to'];
-    // String keyAtsign = notificationList[1];
-    // keyAtsign = keyAtsign.replaceAll('.${preference.namespace.toString()}$sharedByAtsign', '');
-
-    // Yes that is all you need to do!
+    String shortName = "";
+    if (keyAtsign.length > 3) {
+      shortName = keyAtsign[3];
+    }
     var value = keyAtsign[2];
     if (keyAtsign[1] == 'HR') {
       readings.heartRate = value;
@@ -377,7 +390,6 @@ class _HomeScreenState extends State<HomeScreen> {
       readings.oxygenTime = DateTime.now().toUtc().toString();
     }
     // Use this for created at source (reader)
-
     //Or this f client got the reading (safer for demos!)
     var createdAt =
         DateTime.fromMillisecondsSinceEpoch(notificationJson['epochMillis']);
