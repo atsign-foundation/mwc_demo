@@ -139,8 +139,6 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
               }
             }
 
-            // TODO: handle onboard successfully
-
             Navigator.pushNamed(context, HomeScreen.id);
 
             break;
@@ -184,7 +182,8 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
           onPressed: () {
             _showResetDialog(context, false);
           },
-          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.blueAccent)),
+          style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.blueAccent)),
           child: const Text(
             "RESET @SIGNS",
             style: TextStyle(
@@ -274,11 +273,11 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Reset Confirmation"),
+          title: const Text("Reset Confirmation"),
           content: Text("Are you sure you want to reset $atsign?"),
           actions: [
             TextButton(
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
               onPressed: () {
                 _showResetDialog(context, true);
               },
@@ -287,7 +286,7 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.red),
               ),
-              child: Text("Reset", style: TextStyle(color: Colors.white)),
+              child: const Text("Reset", style: TextStyle(color: Colors.white)),
               onPressed: () {
                 _showResetDialog(context, true);
                 _keyChainManager.deleteAtSignFromKeychain(atsign);
@@ -296,7 +295,8 @@ class _OnboardingDialogState extends State<OnboardingDialog> {
                     _atsign = null;
                   }
                   if (_atSignsList.length > 1 && _atsign == atsign) {
-                    _atsign = _atSignsList.firstWhere((element) => element != atsign);
+                    _atsign =
+                        _atSignsList.firstWhere((element) => element != atsign);
                   }
                   _atSignsList.remove(atsign);
                 });
