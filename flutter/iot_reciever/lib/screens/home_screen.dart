@@ -50,6 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
     currentAtsign = atClient.getCurrentAtSign();
     readings.currentAtsign = currentAtsign!;
     var notificationService = atClientManager.notificationService;
+    // adding sync progress listener
+    var syncProgressListener = MySyncProgressListener();
+    atClientManager.syncService.addProgressListener(syncProgressListener);
+
     atClientManager.syncService.sync(onDone: () {
       _logger.info('sync complete');
     });
@@ -427,5 +431,16 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {});
       }
     }
+  }
+}
+
+/// Class representing the Sync Progress.
+class MySyncProgressListener extends SyncProgressListener {
+  @override
+  void onSyncProgressEvent(SyncProgress syncProgress) {
+    print('Sync Progress Info: atSign: ${syncProgress.atSign} '
+        'completedAt: ${syncProgress.completedAt} '
+        'LocalCommitIdBeforeSync: ${syncProgress.localCommitIdBeforeSync} '
+        'LocalCommitIdAfterSync ${syncProgress.localCommitId}');
   }
 }

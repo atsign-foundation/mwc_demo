@@ -104,4 +104,19 @@ void main(List<String> args) async {
 
   logger.info("calling iotListen atSign '$fromAtsign'");
   iotListen(atClientManager, notificationService, fromAtsign,ownerAtsign, deviceName);
+
+  // Adding syncProgressListener to callback.
+  var syncProgressListener = MySyncProgressListener();
+  atClientManager.syncService.addProgressListener(syncProgressListener);
+}
+
+/// Class representing the Sync Progress.
+class MySyncProgressListener extends SyncProgressListener {
+  @override
+  void onSyncProgressEvent(SyncProgress syncProgress) {
+    print('Sync Progress Info: atSign: ${syncProgress.atSign} '
+        'completedAt: ${syncProgress.completedAt} '
+        'LocalCommitIdBeforeSync: ${syncProgress.localCommitIdBeforeSync} '
+        'LocalCommitIdAfterSync ${syncProgress.localCommitId}');
+  }
 }
