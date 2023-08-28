@@ -1,3 +1,7 @@
+## This demo has a new home
+
+Please see [the mwc_demo directory in at_demos](https://github.com/atsign-foundation/at_demos/tree/trunk/mwc_demo).
+
 <img width=250px src="https://atsign.dev/assets/img/atPlatform_logo_gray.svg?sanitize=true">
 
 [![GitHub License](https://img.shields.io/badge/license-BSD3-blue.svg)](./LICENSE)
